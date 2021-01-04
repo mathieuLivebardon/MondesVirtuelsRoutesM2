@@ -32,7 +32,7 @@ public class Manager : MonoBehaviour {
                 lr.positionCount++;
                 lr.SetPosition(lr.positionCount - 1, v);
             }
-
+            lr.name = r.nom;
             lr.widthMultiplier = r.largeur;
         }
     }
@@ -40,16 +40,33 @@ public class Manager : MonoBehaviour {
     /// <summary> Create roads objects from JSON </summary>
     void SetUpRoads() {
         foreach (Feature f in root.features) {
-            int importance = int.Parse(f.properties.IMPORTANCE);
+            int importance = 0;
+            try {
+                importance = int.Parse(f.properties.IMPORTANCE);
+            } catch(System.Exception e) {
+                continue;
+            }
+
+            string name = f.properties.NUMERO + " " + f.properties.NOM_VOIE_G;
+
             float largeur = (float)f.properties.LARGEUR;
             string id = f.properties.ID;
             List<Vector3> positions = new List<Vector3>();
 
             foreach (List<double> l in f.geometry.coordinates[0]) {
-                positions.Add(new Vector3((float)(l[0] - 841251.2), (float)(l[2] - 225.9), (float)(l[1] - 6518666.3)));
+
+                float x = (float)(l[0] - 844522.7);
+                float y = (float)(l[2] - 173);
+                float z = (float)(l[1] - 6522266.8);
+
+                if (y > 3000) {
+                    continue;
+                }
+
+                positions.Add(new Vector3(x, y, z));
             }
 
-            roads.Add(new Road(positions, largeur, importance, id));
+            roads.Add(new Road(positions, largeur, name, importance, id));
         }
     }
 
