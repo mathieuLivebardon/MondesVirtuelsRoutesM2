@@ -12,6 +12,7 @@ public class Manager : MonoBehaviour {
     private Root root;
     private List<Road> roads;
 
+
     void Start() {
         roads = new List<Road>();
         root = JsonParser.Parse("Assets/Data/" + file);
@@ -39,6 +40,9 @@ public class Manager : MonoBehaviour {
 
     /// <summary> Create roads objects from JSON </summary>
     void SetUpRoads() {
+
+        List<float> lstAltitudes = new List<float>();
+
         foreach (Feature f in root.features) {
             int importance = 0;
             try {
@@ -47,7 +51,7 @@ public class Manager : MonoBehaviour {
                 continue;
             }
 
-            string name = f.properties.NUMERO + " " + f.properties.NOM_VOIE_G;
+            string name = f.properties.NUMERO + " " + f.properties.NOM_VOIE_G + " "+ f.properties.ID;
 
             float largeur = (float)f.properties.LARGEUR;
             string id = f.properties.ID;
@@ -55,18 +59,45 @@ public class Manager : MonoBehaviour {
 
             foreach (List<double> l in f.geometry.coordinates[0]) {
 
+                if(l.Count <= 1)
+                {
+                    continue;
+                }
+
+
                 float x = (float)(l[0] - 844522.7);
                 float y = (float)(l[2] - 173);
                 float z = (float)(l[1] - 6522266.8);
 
-                if (y > 3000) {
-                    continue;
-                }
-
+                lstAltitudes.Add(y);
                 positions.Add(new Vector3(x, y, z));
             }
 
+            
+
+
+
             roads.Add(new Road(positions, largeur, name, importance, id));
+        }
+
+        lstAltitudes.Sort();
+
+        int iupper = (int)((lstAltitudes.Count + 1) * 0.55);
+        float maxValue = lstAltitudes[iupper];
+        Debug.Log("Iupper : " + iupper+ " Value : "+ maxValue);
+
+        int ilower = (int)((lstAltitudes.Count + 1) * 0.05);
+        float minValue = lstAltitudes[ilower];
+        Debug.Log("Ilower : " + ilower + " Value : " + minValue);
+
+        for (int i = 0; i < roads.Count; i++)
+        {
+            for(int j = 0; j< roads[i].positions.Count;j++)
+            {
+
+                roads[i].positions[j] = new Vector3(roads[i].positions[j].x, Mathf.Clamp(roads[i].positions[j].y, minValue, maxValue), roads[i].positions[j].z);
+            }
+
         }
     }
 
