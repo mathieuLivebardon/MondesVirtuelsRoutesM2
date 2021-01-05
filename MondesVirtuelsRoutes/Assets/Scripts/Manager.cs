@@ -41,64 +41,103 @@ public class Manager : MonoBehaviour {
     /// <summary> Create roads objects from JSON </summary>
     void SetUpRoads() {
 
-        List<float> lstAltitudes = new List<float>();
+        List<float>[] listsCoordinates = {
+            new List<float>(), new List<float>(), new List<float>()
+        };
 
+        // For each enties in the json
         foreach (Feature f in root.features) {
-            int importance = 0;
-            try {
-                importance = int.Parse(f.properties.IMPORTANCE);
-            } catch(System.Exception e) {
-                continue;
-            }
+            int importance;
+            string nom, id;
+            float largeur;
 
-            string name = f.properties.NUMERO + " " + f.properties.NOM_VOIE_G + " "+ f.properties.ID;
+            // Setting "importance" from the string or 0 if it is not a number
+            int.TryParse(f.properties.IMPORTANCE, out importance);
 
-            float largeur = (float)f.properties.LARGEUR;
-            string id = f.properties.ID;
+            // Setting the name from numero, name and id
+            nom = f.properties.NUMERO + " " + f.properties.NOM_VOIE_G + " "+ f.properties.ID;
+
+            largeur = (float)f.properties.LARGEUR;
+
+            id = f.properties.ID;
+
             List<Vector3> positions = new List<Vector3>();
 
+            // Loop through each point of the road
             foreach (List<double> l in f.geometry.coordinates[0]) {
+                float x = (float)l[0];
+                float y = (float)l[2];
+                float z = (float)l[1];
 
-                if(l.Count <= 1)
-                {
-                    continue;
-                }
+                listsCoordinates[0].Add(x);
+                listsCoordinates[1].Add(y);
+                listsCoordinates[2].Add(z);
 
-
-                float x = (float)(l[0] - 844522.7);
-                float y = (float)(l[2] - 173);
-                float z = (float)(l[1] - 6522266.8);
-
-                lstAltitudes.Add(y);
+                //lstAltitudes.Add(y);
                 positions.Add(new Vector3(x, y, z));
             }
 
-            
 
-
-
-            roads.Add(new Road(positions, largeur, name, importance, id));
+            roads.Add(new Road(positions, largeur, nom, importance, id));
         }
+        
+        listsCoordinates[0].Sort();
+        listsCoordinates[1].Sort();
+        listsCoordinates[2].Sort();
 
-        lstAltitudes.Sort();
+        int iupper = (int)((listsCoordinates[1].Count + 1) * 0.75);
+        float maxValue = listsCoordinates[1][iupper];
 
-        int iupper = (int)((lstAltitudes.Count + 1) * 0.55);
-        float maxValue = lstAltitudes[iupper];
-        Debug.Log("Iupper : " + iupper+ " Value : "+ maxValue);
+        float medX = listsCoordinates[0][(int)((listsCoordinates[0].Count + 1) * 0.5)];
+        float medY = listsCoordinates[1][(int)((listsCoordinates[1].Count + 1) * 0.5)];
+        float medZ = listsCoordinates[2][(int)((listsCoordinates[2].Count + 1) * 0.5)];
 
-        int ilower = (int)((lstAltitudes.Count + 1) * 0.05);
-        float minValue = lstAltitudes[ilower];
-        Debug.Log("Ilower : " + ilower + " Value : " + minValue);
+
+
+        Debug.Log("Max value : " + maxValue);
 
         for (int i = 0; i < roads.Count; i++)
         {
-            for(int j = 0; j< roads[i].positions.Count;j++)
+            for (int j = 0; j < roads[i].positions.Count;j++)
             {
+                float x = roads[i].positions[j].x - medX;
+                float y = roads[i].positions[j].y - medY;
+                float z = roads[i].positions[j].z - medZ;
 
-                roads[i].positions[j] = new Vector3(roads[i].positions[j].x, Mathf.Clamp(roads[i].positions[j].y, minValue, maxValue), roads[i].positions[j].z);
+                roads[i].positions[j] = new Vector3(x, y, z);
             }
-
+            RecalulateAltitude(roads[i], maxValue);
         }
+    }
+
+
+    /* Recalculate altitude for outlier
+     * Returns : true if ok, false instead
+     */
+    bool RecalulateAltitude(Road road, float maxValue) {
+        List<int> indexOutliers = new List<int>();
+        List<int> indexNonOutliers = new List<int>();
+
+        for (int i = 0; i < road.positions.Count; i ++) {
+            if (road.positions[i].y > maxValue) {
+                indexOutliers.Add(i);
+            } else {
+                indexNonOutliers.Add(i);
+            }
+        }
+
+        if (indexNonOutliers.Count == 0) {
+            return false;
+        }
+
+        foreach (int index in indexOutliers) {
+            road.positions[index] = new Vector3(
+                road.positions[index].x,
+                road.positions[indexNonOutliers[0]].y,
+                road.positions[index].z
+                );
+        }
+        return true;
     }
 
 
