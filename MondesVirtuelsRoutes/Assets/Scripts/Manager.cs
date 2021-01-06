@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using System;
 public class Manager : MonoBehaviour {
 
     [SerializeField]
@@ -11,12 +11,15 @@ public class Manager : MonoBehaviour {
 
     private Root root;
     private List<Road> roads;
+    private List<Tuple<int, int>> coordOutliers;
+    private List<Tuple<int, int>> coordNonOutliers;
 
 
     void Start() {
         roads = new List<Road>();
         root = JsonParser.Parse("Assets/Data/" + file);
-
+        coordOutliers = new List<Tuple<int, int>>();
+        coordNonOutliers = new List<Tuple<int, int>>();
         SetUpRoads();
 
         DrawRoads();
@@ -105,10 +108,48 @@ public class Manager : MonoBehaviour {
                 float z = roads[i].positions[j].z - medZ;
 
                 roads[i].positions[j] = new Vector3(x, y, z);
+
+                if (roads[i].positions[j].y > maxValue)
+                {
+                    coordOutliers.Add(new Tuple<int, int>(i,j));
+                }
+                else
+                {
+                    coordNonOutliers.Add(new Tuple<int, int>(i, j));
+                }
             }
-            RecalulateAltitude(roads[i], maxValue);
         }
+
+        foreach(Tuple<int,int> tOutlier in coordOutliers)
+        {
+            RecalulateAltitude2(tOutlier);
+        }
+
     }
+
+
+    void RecalulateAltitude2(Tuple<int, int> tOutlier)
+    {
+        float nearestDistance = float.MaxValue;
+        Vector3 nearestVec = Vector3.zero;
+        Vector3 vecOutlier = roads[tOutlier.Item1].positions[tOutlier.Item2];
+        
+        foreach (Tuple<int, int> tNonoutlier in coordNonOutliers)
+        {
+            Vector3 vecNonOutlier = roads[tNonoutlier.Item1].positions[tNonoutlier.Item2]; 
+            float distance = Vector2.Distance(new Vector2(vecOutlier.x, vecOutlier.z), new Vector2(vecNonOutlier.x, vecNonOutlier.z));
+            if ( distance < nearestDistance)
+            {
+                nearestDistance = distance;
+                nearestVec = vecNonOutlier;
+            }
+        }
+
+        roads[tOutlier.Item1].positions[tOutlier.Item2] = new Vector3(vecOutlier.x, nearestVec.y , vecOutlier.z);
+
+    }
+
+
 
 
     /* Recalculate altitude for outlier
@@ -121,6 +162,7 @@ public class Manager : MonoBehaviour {
         for (int i = 0; i < road.positions.Count; i ++) {
             if (road.positions[i].y > maxValue) {
                 indexOutliers.Add(i);
+
             } else {
                 indexNonOutliers.Add(i);
             }
