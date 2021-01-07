@@ -302,7 +302,21 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 1123053598}
   m_PrefabAsset: {fileID: 0}
---- !u!54 &947811666
+--- !u!64 &947811669
+MeshCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 947811665}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  serializedVersion: 4
+  m_Convex: 0
+  m_CookingOptions: 30
+  m_Mesh: {fileID: -462981019419857548, guid: 203654595eeb1cd4d8006ccaf133e5fc, type: 3}
+--- !u!54 &947811670
 Rigidbody:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -318,20 +332,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!64 &947811669
-MeshCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 947811665}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 4
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: -462981019419857548, guid: 203654595eeb1cd4d8006ccaf133e5fc, type: 3}
 --- !u!1001 &1123053598
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -451,7 +451,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c91d7cb6e5d6fd14781b99bd78b0eeec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  file: Routes_Poleymieux.geojson.json
+  file: uneRoute.json
   emptyRoad: {fileID: 2663940008502638877, guid: e469fe7b967f6c0469fec3d880b03fe4,
     type: 3}
   terrain: {fileID: 1123053599}
