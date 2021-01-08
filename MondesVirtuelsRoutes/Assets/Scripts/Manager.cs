@@ -10,12 +10,6 @@ public class Manager : MonoBehaviour {
     private GameObject emptyRoad;
     [SerializeField]
     private GameObject terrain;
-    [SerializeField]
-    private GameObject sphereRouge;
-    [SerializeField]
-    private GameObject sphereBleu;
-    [SerializeField]
-    private GameObject sphere;
 
     private Root root;
     private List<Road> roads;
@@ -143,10 +137,6 @@ public class Manager : MonoBehaviour {
 
                         if (counterB >= 100) {
                             print("counterB : " + counterB);
-
-                            Instantiate(sphereRouge, previousVertice, Quaternion.identity);
-                            Instantiate(sphere, currentVertice, Quaternion.identity);
-                            Instantiate(sphereBleu, temporaryPoint, Quaternion.identity);
 
                             print("previousVertice : " + previousVertice);
                             print("currentVertice : " + currentVertice);

@@ -303,41 +303,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 31168652754925550, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 31168652754925550, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 31168652754925550, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 31168652754925550, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalRotation.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 31168652754925550, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalRotation.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 31168652754925550, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 31168652754925550, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 4867043672807715889, guid: 87c18ea91ae69814ab17f6f0e07126e5,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -393,30 +358,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 4867043672807715889, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalScale.x
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4867043672807715889, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalScale.y
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 4867043672807715889, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_LocalScale.z
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 5242443693913566859, guid: 87c18ea91ae69814ab17f6f0e07126e5,
         type: 3}
       propertyPath: m_Name
       value: map
-      objectReference: {fileID: 0}
-    - target: {fileID: 5242443693913566859, guid: 87c18ea91ae69814ab17f6f0e07126e5,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 87c18ea91ae69814ab17f6f0e07126e5, type: 3}
@@ -455,7 +400,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c91d7cb6e5d6fd14781b99bd78b0eeec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  file: uneRoute.json
+  file: Routes_Poleymieux.geojson.json
   emptyRoad: {fileID: 2663940008502638877, guid: e469fe7b967f6c0469fec3d880b03fe4,
     type: 3}
   terrain: {fileID: 1123053599}
