@@ -28,6 +28,7 @@ public class Manager : MonoBehaviour {
 
         if (fixTerrainCoord)
             FixTerrainCoord();
+
         SetUpRoads();
         DrawRoads();
     }
@@ -40,8 +41,8 @@ public class Manager : MonoBehaviour {
             // foreach (Vector3 p in mesh.vertices) {
             Vector3 p = mesh.vertices[i];
             Vector3 reversed = new Vector3(p.x, p.z, -p.y);
-            if (drawSpheres)
-                Instantiate(sphere, reversed, Quaternion.identity);
+            /*if (drawSpheres)
+                Instantiate(sphere, reversed, Quaternion.identity);*/
 
             newVertices[i] = reversed;
         }
@@ -127,11 +128,8 @@ public class Manager : MonoBehaviour {
                         Vector2 intersection = GetIntersectionPointCoordinates(previous2D, current2D, firstPoint_Edge2D, secondPoint_Edge2D, out bool found);
                         if (found) {
                             float t = (intersection.x - firstPoint_Edge2D.x) / (secondPoint_Edge2D.x - firstPoint_Edge2D.x);
-                            float intersectY = (firstPoint_Edge2D.y + (secondPoint_Edge2D.y - firstPoint_Edge2D.y)) * t;
+                            Vector3 pointOnEdge = (sharedVertices[0] + (sharedVertices[1] - sharedVertices[0]) * t);
 
-                            Vector3 pointOnEdge = new Vector3(intersection.x, intersectY, intersection.y);
-
-                            //AddPointOnRoad(pointOnEdge, positions);
                             positions.Add(pointOnEdge);
                         }
                     }
