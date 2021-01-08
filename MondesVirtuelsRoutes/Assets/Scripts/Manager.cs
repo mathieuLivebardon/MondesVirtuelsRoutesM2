@@ -103,18 +103,26 @@ public class Manager : MonoBehaviour {
             List<Vector3> positions = new List<Vector3>();
 
             // Loop through each point of the road
-            foreach (List<double> l in f.geometry.coordinates[0]) {
+            for (int i = 0; i< f.geometry.coordinates[0].Count;i++) {
+                List<double> l = f.geometry.coordinates[0][i];
                 float x = (float)l[0] - xOffset;
                 float z = (float)l[1] - zOffset;
-                float y = GetAltitudeFromMap(new Vector3(x, 0, z), out currentIndexTriangle);
+                float y = GetAltitudeFromMap(new Vector3(x, 9999, z), out currentIndexTriangle);
 
                 currentVertice = new Vector3(x, y, z);
 
 
-                if (ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> sharedVertices) == 2) {
+                bool addPoint = false;
+                if(ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> sharedVertices) < 2)
+                {
+                    Vector3 verticeInTheMiddle = (currentVertice - previousVertice) * 0.5f;
+                    verticeInTheMiddle.y = GetAltitudeFromMap(new Vector3(verticeInTheMiddle.x, 9999, verticeInTheMiddle.z), out currentIndexTriangle);
+                    currentVertice = verticeInTheMiddle;
+
+                    addPoint = true;
+                }
+                /*else{
                     // calculer un point sur l'arrete
-
-
                     if (previousVertice != Vector3.negativeInfinity) {
                         Vector3 directionRoad = (currentVertice - previousVertice).normalized;
                         Vector3 directionEdge = (sharedVertices[1] - sharedVertices[0]).normalized;
@@ -133,13 +141,15 @@ public class Manager : MonoBehaviour {
                             positions.Add(pointOnEdge);
                         }
                     }
+                }*/
+                
+
+                if(!addPoint)
+                { 
+                    previousVertice = currentVertice;
+                    previousIndexTriangle = currentIndexTriangle;
+                    positions.Add(new Vector3(x, y, z));
                 }
-
-
-                previousVertice = currentVertice;
-                previousIndexTriangle = currentIndexTriangle;
-
-                positions.Add(new Vector3(x, y, z));
             }
 
             roads.Add(new Road(positions, largeur, nom, importance, id));
@@ -181,16 +191,14 @@ public class Manager : MonoBehaviour {
             }
             return sharedVertices.Count;
         }
-        return 0;
+        return 3;
     }
 
     /// <summary>Get the Y coordinate which will fit with the terrain depending on X & Z or 0.0</summary>
     private float GetAltitudeFromMap(Vector3 pos, out int indexTriangle) {
         RaycastHit hit;
-        Vector3 rayOrigin = new Vector3(pos.x, 9999, pos.z);
-
         indexTriangle = 0;
-        if (Physics.Raycast(rayOrigin, Vector3.down, out hit)) {
+        if (Physics.Raycast(pos, Vector3.down, out hit)) {
             indexTriangle = hit.triangleIndex;
             return hit.point.y;
         } 
