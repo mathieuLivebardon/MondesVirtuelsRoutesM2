@@ -187,14 +187,13 @@ public class Manager : MonoBehaviour {
     /// <summary>Get the Y coordinate which will fit with the terrain depending on X & Z or 0.0</summary>
     private float GetAltitudeFromMap(Vector3 pos, out int indexTriangle) {
         RaycastHit hit;
+        Vector3 rayOrigin = new Vector3(pos.x, 9999, pos.z);
+
         indexTriangle = 0;
-        if (Physics.Raycast(pos, Vector3.down, out hit)) {
+        if (Physics.Raycast(rayOrigin, Vector3.down, out hit)) {
             indexTriangle = hit.triangleIndex;
             return hit.point.y;
-        } else if (Physics.Raycast(pos, Vector3.up, out hit)) {
-            indexTriangle = hit.triangleIndex;
-            return hit.point.y;
-        }
+        } 
         return 0.0f;
     }
 
