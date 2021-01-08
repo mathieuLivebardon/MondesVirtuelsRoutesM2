@@ -11,6 +11,10 @@ public class Manager : MonoBehaviour {
     [SerializeField]
     private GameObject terrain;
     [SerializeField]
+    private GameObject sphereRouge;
+    [SerializeField]
+    private GameObject sphereBleu;
+    [SerializeField]
     private GameObject sphere;
 
     private Root root;
@@ -81,8 +85,8 @@ public class Manager : MonoBehaviour {
 
         // For each enties (roads) in the json
         foreach (Feature f in root.features) {
-            int previousIndexTriangle = -1;
-            int currentIndexTriangle;
+            int previousIndexTriangle = int.MinValue;
+            int currentIndexTriangle = 0;
 
             int importance;
             string nom, id;
@@ -112,16 +116,83 @@ public class Manager : MonoBehaviour {
                 currentVertice = new Vector3(x, y, z);
 
 
-                bool addPoint = false;
-                if(ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> sharedVertices) < 2)
+                int counterA = 0;
+
+                Vector3 temporaryPoint = Vector3.negativeInfinity;
+
+                while (temporaryPoint != currentVertice && counterA < 100) {
+
+
+                    int counterB = 0;
+
+                    temporaryPoint = currentVertice;
+
+                    int amountSharedVertices = ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> sharedVertices);
+
+                    int temporaryIndexTriangle = currentIndexTriangle;
+
+                    while ((amountSharedVertices < 2 && previousIndexTriangle != temporaryIndexTriangle) && counterB < 100) {
+                        Vector3 verticeInTheMiddle = previousVertice + (temporaryPoint - previousVertice) * 0.5f;
+                        verticeInTheMiddle.y = GetAltitudeFromMap(new Vector3(verticeInTheMiddle.x, 9999, verticeInTheMiddle.z), out temporaryIndexTriangle);
+
+                        amountSharedVertices = ManageTriangleIntersection(previousIndexTriangle, temporaryIndexTriangle, out sharedVertices);
+
+                        temporaryPoint = verticeInTheMiddle;
+
+                        counterB++;
+
+                        if (counterB >= 100) {
+                            print("counterB : " + counterB);
+
+                            Instantiate(sphereRouge, previousVertice, Quaternion.identity);
+                            Instantiate(sphere, currentVertice, Quaternion.identity);
+                            Instantiate(sphereBleu, temporaryPoint, Quaternion.identity);
+
+                            print("previousVertice : " + previousVertice);
+                            print("currentVertice : " + currentVertice);
+                            print("temporaryPoint : " + temporaryPoint);
+
+                            print("amountSharedVertices : " + amountSharedVertices);
+                        }
+                    }
+
+                    counterA++;
+
+                    previousVertice = temporaryPoint;
+                    previousIndexTriangle = temporaryIndexTriangle;
+
+                    positions.Add(temporaryPoint);
+
+                    if (counterA >= 100) {
+                        print("counterA : " + counterA);
+                    }
+                }
+
+
+                /*if (previousIndexTriangle == currentIndexTriangle) {
+                    // On ajoute : is ok
+                } else if (ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> sharedVertices) == 2) { // Deux triangles consecutifs
+                    // On ajoute un point sur l'arrete
+                } else {
+                    // On ajoute un point au milieu
+                }*/
+
+
+
+
+                /*bool addPoint = false;
+                int nbIntersection = ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> sharedVertices);
+                if (nbIntersection < 2)
                 {
                     Vector3 verticeInTheMiddle = (currentVertice - previousVertice) * 0.5f;
                     verticeInTheMiddle.y = GetAltitudeFromMap(new Vector3(verticeInTheMiddle.x, 9999, verticeInTheMiddle.z), out currentIndexTriangle);
                     currentVertice = verticeInTheMiddle;
 
                     addPoint = true;
+                } else if (nbIntersection == 2) {
+
                 }
-                /*else{
+                else{
                     // calculer un point sur l'arrete
                     if (previousVertice != Vector3.negativeInfinity) {
                         Vector3 directionRoad = (currentVertice - previousVertice).normalized;
@@ -141,7 +212,7 @@ public class Manager : MonoBehaviour {
                             positions.Add(pointOnEdge);
                         }
                     }
-                }*/
+                }
                 
 
                 if(!addPoint)
@@ -149,7 +220,10 @@ public class Manager : MonoBehaviour {
                     previousVertice = currentVertice;
                     previousIndexTriangle = currentIndexTriangle;
                     positions.Add(new Vector3(x, y, z));
-                }
+                }*/
+                /*previousVertice = currentVertice;
+                previousIndexTriangle = currentIndexTriangle;
+                positions.Add(new Vector3(x, y, z));*/
             }
 
             roads.Add(new Road(positions, largeur, nom, importance, id));
@@ -201,7 +275,7 @@ public class Manager : MonoBehaviour {
         if (Physics.Raycast(pos, Vector3.down, out hit)) {
             indexTriangle = hit.triangleIndex;
             return hit.point.y;
-        } 
+        }
         return 0.0f;
     }
 
