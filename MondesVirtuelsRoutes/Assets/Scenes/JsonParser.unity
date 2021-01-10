@@ -405,7 +405,6 @@ MonoBehaviour:
     type: 3}
   terrain: {fileID: 1123053599}
   fixTerrainCoord: 1
-  drawSpheres: 0
 --- !u!4 &2071228028
 Transform:
   m_ObjectHideFlags: 0

@@ -16,9 +16,6 @@ public class Manager : MonoBehaviour {
 
     [SerializeField]
     private bool fixTerrainCoord;
-    [SerializeField]
-    private bool drawSpheres;
-
 
     void Start() {
         roads = new List<Road>();
@@ -36,11 +33,8 @@ public class Manager : MonoBehaviour {
         Mesh mesh = terrain.GetComponentInChildren<MeshFilter>().mesh;
         Vector3[] newVertices = new Vector3[mesh.vertices.Length];
         for (int i = 0; i < mesh.vertices.Length; i++) {
-            // foreach (Vector3 p in mesh.vertices) {
             Vector3 p = mesh.vertices[i];
             Vector3 reversed = new Vector3(p.x, p.z, -p.y);
-            /*if (drawSpheres)
-                Instantiate(sphere, reversed, Quaternion.identity);*/
 
             newVertices[i] = reversed;
         }
@@ -147,6 +141,9 @@ public class Manager : MonoBehaviour {
                         }
                     }
 
+                    // If there is two vertices between previous and current triangles,
+                    // both triangles are neighbours, and we have to create a vertice
+                    // on the shared edge
                     if (amountSharedVertices == 2) {
                         if (GetPointOnEdge(previousVertice, currentVertice, sharedVertices[0], sharedVertices[1], out Vector3 pointOnEdge)) {
                             positions.Add(pointOnEdge);
@@ -160,7 +157,7 @@ public class Manager : MonoBehaviour {
 
                     positions.Add(temporaryPoint);
 
-                    if (counterA >= 100) {
+                    if (counterA >= 50) {
                         print("counterA : " + counterA);
                     }
                 }
