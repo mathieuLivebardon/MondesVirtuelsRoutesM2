@@ -109,7 +109,6 @@ public class Manager : MonoBehaviour {
 
                 currentVertice = new Vector3(x, y, z);
 
-
                 int counterA = 0;
 
                 Vector3 temporaryPoint = Vector3.negativeInfinity;
@@ -124,7 +123,7 @@ public class Manager : MonoBehaviour {
 
                     int temporaryIndexTriangle = currentIndexTriangle;
 
-                    while ((amountSharedVertices < 2 && previousIndexTriangle != temporaryIndexTriangle) && counterB < 100) {
+                    while ((amountSharedVertices < 2 && previousIndexTriangle != temporaryIndexTriangle) && counterB < 50) {
                         Vector3 verticeInTheMiddle = previousVertice + (temporaryPoint - previousVertice) * 0.5f;
                         verticeInTheMiddle.y = GetAltitudeFromMap(new Vector3(verticeInTheMiddle.x, 9999, verticeInTheMiddle.z), out temporaryIndexTriangle);
 
@@ -137,6 +136,8 @@ public class Manager : MonoBehaviour {
                         if (counterB >= 50) {
                             print("counterB : " + counterB);
 
+                            print("currentVertice : " + currentVertice);
+
                             /*print("previousVertice : " + previousVertice);
                             print("currentVertice : " + currentVertice);
                             print("temporaryPoint : " + temporaryPoint);
@@ -147,10 +148,8 @@ public class Manager : MonoBehaviour {
                     }
 
                     if (amountSharedVertices == 2) {
-                        if (previousVertice != Vector3.negativeInfinity) {
-                            if (GetPointOnEdge(previousVertice, currentVertice, sharedVertices[0], sharedVertices[1], out Vector3 pointOnEdge)) {
-                                positions.Add(pointOnEdge);
-                            }
+                        if (GetPointOnEdge(previousVertice, currentVertice, sharedVertices[0], sharedVertices[1], out Vector3 pointOnEdge)) {
+                            positions.Add(pointOnEdge);
                         }
                     }
 
@@ -165,65 +164,6 @@ public class Manager : MonoBehaviour {
                         print("counterA : " + counterA);
                     }
                 }
-
-                int nbIntersection = ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> _sharedVertices);
-                print("\t" + nbIntersection);
-
-                /*if (previousIndexTriangle == currentIndexTriangle) {
-                    // On ajoute : is ok
-                } else if (ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> sharedVertices) == 2) { // Deux triangles consecutifs
-                    // On ajoute un point sur l'arrete
-                } else {
-                    // On ajoute un point au milieu
-                }*/
-
-
-
-
-                /*bool addPoint = false;
-                int nbIntersection = ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> sharedVertices);
-                if (nbIntersection < 2)
-                {
-                    Vector3 verticeInTheMiddle = (currentVertice - previousVertice) * 0.5f;
-                    verticeInTheMiddle.y = GetAltitudeFromMap(new Vector3(verticeInTheMiddle.x, 9999, verticeInTheMiddle.z), out currentIndexTriangle);
-                    currentVertice = verticeInTheMiddle;
-
-                    addPoint = true;
-                } else if (nbIntersection == 2) {
-
-                }
-                else{
-                    // calculer un point sur l'arrete
-                    if (previousVertice != Vector3.negativeInfinity) {
-                        Vector3 directionRoad = (currentVertice - previousVertice).normalized;
-                        Vector3 directionEdge = (sharedVertices[1] - sharedVertices[0]).normalized;
-
-                        Vector2 current2D = new Vector2(currentVertice.x, currentVertice.z);
-                        Vector2 previous2D = new Vector2(previousVertice.x, previousVertice.z);
-
-                        Vector2 firstPoint_Edge2D = new Vector2(sharedVertices[0].x, sharedVertices[0].z);
-                        Vector2 secondPoint_Edge2D = new Vector2(sharedVertices[1].x, sharedVertices[1].z);
-
-                        Vector2 intersection = GetIntersectionPointCoordinates(previous2D, current2D, firstPoint_Edge2D, secondPoint_Edge2D, out bool found);
-                        if (found) {
-                            float t = (intersection.x - firstPoint_Edge2D.x) / (secondPoint_Edge2D.x - firstPoint_Edge2D.x);
-                            Vector3 pointOnEdge = (sharedVertices[0] + (sharedVertices[1] - sharedVertices[0]) * t);
-
-                            positions.Add(pointOnEdge);
-                        }
-                    }
-                }
-                
-
-                if(!addPoint)
-                { 
-                    previousVertice = currentVertice;
-                    previousIndexTriangle = currentIndexTriangle;
-                    positions.Add(new Vector3(x, y, z));
-                }*/
-                /*previousVertice = currentVertice;
-                previousIndexTriangle = currentIndexTriangle;
-                positions.Add(new Vector3(x, y, z));*/
             }
 
             roads.Add(new Road(positions, largeur, nom, importance, id));
@@ -231,6 +171,13 @@ public class Manager : MonoBehaviour {
     }
 
     private bool GetPointOnEdge(Vector3 roadA, Vector3 roadB, Vector3 edgeA, Vector3 edgeB, out Vector3 pointOnEdge) {
+
+        pointOnEdge = Vector3.negativeInfinity;
+
+        if (roadA == Vector3.negativeInfinity) {
+            return false;
+        }
+
         Vector2 firstPoint_road2D = new Vector2(roadA.x, roadA.z);
         Vector2 secondPoint_road2D = new Vector2(roadB.x, roadB.z);
 
@@ -244,12 +191,7 @@ public class Manager : MonoBehaviour {
 
             return true;
         }
-        pointOnEdge = new Vector3();
         return false;
-    }
-
-    private void print(object s) {
-        Debug.Log(s.ToString());
     }
 
     /** Depending on triangle index, find (if it exist) the shared edge
@@ -262,16 +204,16 @@ public class Manager : MonoBehaviour {
             Mesh mesh = terrain.GetComponentInChildren<MeshFilter>().mesh;
 
             List<Vector3> previousVertices = new List<Vector3> {
-                        mesh.vertices[mesh.triangles[previousIndexTriangle * 3 + 0]],
-                        mesh.vertices[mesh.triangles[previousIndexTriangle * 3 + 1]],
-                        mesh.vertices[mesh.triangles[previousIndexTriangle * 3 + 2]]
-                    };
+                mesh.vertices[mesh.triangles[previousIndexTriangle * 3 + 0]],
+                mesh.vertices[mesh.triangles[previousIndexTriangle * 3 + 1]],
+                mesh.vertices[mesh.triangles[previousIndexTriangle * 3 + 2]]
+            };
 
             List<Vector3> currentVertices = new List<Vector3> {
-                        mesh.vertices[mesh.triangles[currentIndexTriangle * 3 + 0]],
-                        mesh.vertices[mesh.triangles[currentIndexTriangle * 3 + 1]],
-                        mesh.vertices[mesh.triangles[currentIndexTriangle * 3 + 2]]
-                    };
+                mesh.vertices[mesh.triangles[currentIndexTriangle * 3 + 0]],
+                mesh.vertices[mesh.triangles[currentIndexTriangle * 3 + 1]],
+                mesh.vertices[mesh.triangles[currentIndexTriangle * 3 + 2]]
+            };
 
             for (int i = 0; i < previousVertices.Count; i++) {
                 for (int j = 0; j < currentVertices.Count; j++) {
