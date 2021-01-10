@@ -80,7 +80,7 @@ public class Manager : MonoBehaviour {
         // For each enties (roads) in the json
         foreach (Feature f in root.features) {
             int previousIndexTriangle = int.MinValue;
-            int currentIndexTriangle = 0;
+            int currentIndexTriangle;
 
             int importance;
             string nom, id;
@@ -114,8 +114,7 @@ public class Manager : MonoBehaviour {
 
                 Vector3 temporaryPoint = Vector3.negativeInfinity;
 
-                while (temporaryPoint != currentVertice && counterA < 100) {
-
+                while (temporaryPoint != currentVertice && counterA < 50) {
 
                     int counterB = 0;
 
@@ -135,14 +134,23 @@ public class Manager : MonoBehaviour {
 
                         counterB++;
 
-                        if (counterB >= 100) {
+                        if (counterB >= 50) {
                             print("counterB : " + counterB);
 
-                            print("previousVertice : " + previousVertice);
+                            /*print("previousVertice : " + previousVertice);
                             print("currentVertice : " + currentVertice);
                             print("temporaryPoint : " + temporaryPoint);
 
-                            print("amountSharedVertices : " + amountSharedVertices);
+                            print("previousIndexTriangle : " + previousIndexTriangle);
+                            print("temporaryIndexTriangle : " + temporaryIndexTriangle);*/
+                        }
+                    }
+
+                    if (amountSharedVertices == 2) {
+                        if (previousVertice != Vector3.negativeInfinity) {
+                            if (GetPointOnEdge(previousVertice, currentVertice, sharedVertices[0], sharedVertices[1], out Vector3 pointOnEdge)) {
+                                positions.Add(pointOnEdge);
+                            }
                         }
                     }
 
@@ -158,6 +166,8 @@ public class Manager : MonoBehaviour {
                     }
                 }
 
+                int nbIntersection = ManageTriangleIntersection(previousIndexTriangle, currentIndexTriangle, out List<Vector3> _sharedVertices);
+                print("\t" + nbIntersection);
 
                 /*if (previousIndexTriangle == currentIndexTriangle) {
                     // On ajoute : is ok
@@ -218,6 +228,24 @@ public class Manager : MonoBehaviour {
 
             roads.Add(new Road(positions, largeur, nom, importance, id));
         }
+    }
+
+    private bool GetPointOnEdge(Vector3 roadA, Vector3 roadB, Vector3 edgeA, Vector3 edgeB, out Vector3 pointOnEdge) {
+        Vector2 firstPoint_road2D = new Vector2(roadA.x, roadA.z);
+        Vector2 secondPoint_road2D = new Vector2(roadB.x, roadB.z);
+
+        Vector2 firstPoint_Edge2D = new Vector2(edgeA.x, edgeA.z);
+        Vector2 secondPoint_Edge2D = new Vector2(edgeB.x, edgeB.z);
+
+        Vector2 intersection = GetIntersectionPointCoordinates(firstPoint_road2D, secondPoint_road2D, firstPoint_Edge2D, secondPoint_Edge2D, out bool found);
+        if (found) {
+            float t = (intersection.x - firstPoint_Edge2D.x) / (secondPoint_Edge2D.x - firstPoint_Edge2D.x);
+            pointOnEdge = (edgeA + (edgeB - edgeA) * t);
+
+            return true;
+        }
+        pointOnEdge = new Vector3();
+        return false;
     }
 
     private void print(object s) {

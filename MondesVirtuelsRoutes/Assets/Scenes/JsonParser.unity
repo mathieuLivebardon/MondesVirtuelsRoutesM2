@@ -400,15 +400,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c91d7cb6e5d6fd14781b99bd78b0eeec, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  file: Routes_Poleymieux.geojson.json
+  file: uneRoute.json
   emptyRoad: {fileID: 2663940008502638877, guid: e469fe7b967f6c0469fec3d880b03fe4,
     type: 3}
   terrain: {fileID: 1123053599}
-  sphereRouge: {fileID: 5401473539605274624, guid: 570ab4af840a47149877534b1001c11e,
-    type: 3}
-  sphereBleu: {fileID: 5401473539605274624, guid: 1df68e3a333e6474a80002f53d619bff,
-    type: 3}
-  sphere: {fileID: 5401473539605274624, guid: e03a519bba4d57c49b29664318f51984, type: 3}
   fixTerrainCoord: 1
   drawSpheres: 0
 --- !u!4 &2071228028
