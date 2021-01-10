@@ -10,6 +10,8 @@ public class Manager : MonoBehaviour {
     private GameObject emptyRoad;
     [SerializeField]
     private GameObject terrain;
+    [SerializeField]
+    private Material roadMaterial;
 
     private Root root;
     private List<Road> roads;
@@ -29,7 +31,6 @@ public class Manager : MonoBehaviour {
     }
 
     private void FixTerrainCoord() {
-
         Mesh mesh = terrain.GetComponentInChildren<MeshFilter>().mesh;
         Vector3[] newVertices = new Vector3[mesh.vertices.Length];
         for (int i = 0; i < mesh.vertices.Length; i++) {
@@ -64,6 +65,51 @@ public class Manager : MonoBehaviour {
             lr.name = r.nom;
             lr.widthMultiplier = r.largeur;
         }
+        foreach (Road r in roads) {
+            GameObject newRoad = new GameObject(r.id + " - " + r.nom);
+            Mesh msh = new Mesh();
+
+            List<Vector3> vertices = new List<Vector3>();
+            List<int> triangles = new List<int>();
+            for (int i = 0; i < r.positions.Count; i++) {
+                Vector3 direction = GetRoadDirection(r, i);
+
+                vertices.Add(r.positions[i] + new Vector3(0, 1f, -r.largeur * 2));
+                vertices.Add(r.positions[i] + new Vector3(0, 1f, r.largeur * 2));
+
+                if (i > 0) {
+                    triangles.Add(i * 2 - 2);
+                    triangles.Add(i * 2 - 0);
+                    triangles.Add(i * 2 - 1);
+
+                    triangles.Add(i * 2 - 0);
+                    triangles.Add(i * 2 + 1);
+                    triangles.Add(i * 2 - 1);
+                }
+            }
+            msh.vertices = vertices.ToArray();
+            msh.triangles = triangles.ToArray();
+
+            newRoad.AddComponent<MeshFilter>();
+            newRoad.AddComponent<MeshRenderer>();
+
+            newRoad.GetComponent<MeshFilter>().mesh = msh;
+            newRoad.GetComponent<MeshRenderer>().material = roadMaterial;
+        }
+    }
+
+    private Vector3 GetRoadDirection(Road road, int indexPosition) {
+        Vector3 prevDirection = Vector3.zero;
+        Vector3 nextDirection = Vector3.zero;
+
+        if (indexPosition > 0) {
+            prevDirection = (road.positions[indexPosition] - road.positions[indexPosition - 1]).normalized;
+        }
+        if (indexPosition < road.positions.Count - 1) {
+            nextDirection = (road.positions[indexPosition + 1] - road.positions[indexPosition]).normalized;
+        }
+
+        return (prevDirection + nextDirection).normalized;
     }
 
     /// <summary> Create roads objects from JSON </summary>

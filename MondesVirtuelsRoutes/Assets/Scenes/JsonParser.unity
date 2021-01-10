@@ -404,6 +404,7 @@ MonoBehaviour:
   emptyRoad: {fileID: 2663940008502638877, guid: e469fe7b967f6c0469fec3d880b03fe4,
     type: 3}
   terrain: {fileID: 1123053599}
+  roadMaterial: {fileID: 2100000, guid: 4a94e8ae483dc1e4d9236b087644594a, type: 2}
   fixTerrainCoord: 1
 --- !u!4 &2071228028
 Transform:
