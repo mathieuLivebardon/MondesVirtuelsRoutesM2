@@ -324,6 +324,7 @@ public class Manager : MonoBehaviour {
         }
 
         Debug.Log("total verts " + total_vert);
+        Debug.Log("total triangles " + total_tri);
     }
     private void DrawMesh ()
     {
@@ -340,6 +341,8 @@ public class Manager : MonoBehaviour {
 
         foreach (Road road in roads)
         {
+            int rpcount = road.positions.Count;
+
             for (int i = 0; i < road.positions.Count - 1; i+=2)
             {
                 verticies[vert_counter + i] = road.positions[i] + Quaternion.AngleAxis(90, Vector3.up) * ((road.positions[i + 1] - road.positions[i]).normalized);
@@ -348,33 +351,33 @@ public class Manager : MonoBehaviour {
                 //i++;
 
             }
-            //verticies[verticies.Length - 2] = road.positions[rpcount - 1] + Quaternion.AngleAxis(90, Vector3.up) * ((road.positions[rpcount - 1] - road.positions[rpcount - 2]).normalized);
-            //verticies[verticies.Length - 1] = road.positions[rpcount - 1] + Quaternion.AngleAxis(-90, Vector3.up) * ((road.positions[rpcount - 1] - road.positions[rpcount - 2]).normalized);
+            verticies[vert_counter + rpcount - 2] = road.positions[rpcount - 1] + Quaternion.AngleAxis(90, Vector3.up) * ((road.positions[rpcount - 1] - road.positions[rpcount - 2]).normalized);
+            verticies[vert_counter + rpcount - 1] = road.positions[rpcount - 1] + Quaternion.AngleAxis(-90, Vector3.up) * ((road.positions[rpcount - 1] - road.positions[rpcount - 2]).normalized);
 
-            vert_counter += road.positions.Count;
+            vert_counter += rpcount;
 
         }
 
         int tri_counter = 0;
-        int tri = 0;
-        //foreach (Road road in roads)
-        //{
-        //    int triangles_lenght = 6 * (road.positions.Count - 1);
-        //    for (int i = 0; i < triangles_lenght; i += 6)
-        //    {
-        //        triangles[tri_counter + i] = tri;
-        //        triangles[tri_counter + i + 1] = tri + 1;
-        //        triangles[tri_counter + i + 2] = tri + 2;
-        //        triangles[tri_counter + i + 3] = tri + 3;
-        //        triangles[tri_counter + i + 4] = tri + 2;
-        //        triangles[tri_counter + i + 5] = tri + 1;
+        //int tri = 0;
+        foreach (Road road in roads)
+        {
+            int triangles_lenght = 6 * (road.positions.Count - 1);
+            for (int i = 0, tri = 0; i < triangles_lenght - 5; i += 6, tri += 2)
+            {
+                triangles[tri_counter + i] = tri_counter + tri;
+                triangles[tri_counter + i + 1] = tri_counter + tri + 1;
+                triangles[tri_counter + i + 2] = tri_counter + tri + 2;
+                triangles[tri_counter + i + 3] = tri_counter + tri + 3;
+                triangles[tri_counter + i + 4] = tri_counter + tri + 2;
+                triangles[tri_counter + i + 5] = tri_counter + tri + 1;
 
-        //        tri += 2;
-        //        //Debug.Log($"{triangles[i]}, {triangles[i+1]}, {triangles[i+2]}," +
-        //        //    $"{triangles[i+3]}, {triangles[i+4]}, {triangles[i+5]}");
-        //    }
+                Debug.Log($"{triangles[tri_counter + i]}, {triangles[tri_counter + i + 1]}, {triangles[tri_counter + i + 2]}," +
+                    $"{triangles[tri_counter + i + 3]}, {triangles[tri_counter + i + 4]}, {triangles[tri_counter + i + 5]}");
+            }
+            tri_counter += triangles_lenght;
 
-        //}
+        }
 
         msh.Clear();
         msh.vertices = verticies;
