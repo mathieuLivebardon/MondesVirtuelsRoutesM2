@@ -19,6 +19,11 @@ public class Manager : MonoBehaviour {
     [SerializeField]
     private bool drawSpheres;
 
+    Mesh msh;
+
+    Vector3[] verticies;
+    int[] triangles;
+
 
     void Start() {
         roads = new List<Road>();
@@ -29,6 +34,10 @@ public class Manager : MonoBehaviour {
 
         SetUpRoads();
         DrawRoads();
+
+        //ADDING THE ROAD MESH
+        DrawMesh();
+
     }
 
     private void FixTerrainCoord() {
@@ -295,5 +304,73 @@ public class Manager : MonoBehaviour {
             B1.x + (B2.x - B1.x) * mu,
             B1.y + (B2.y - B1.y) * mu
         );
+    }
+
+    private void DrawMesh()
+    {
+        msh = new Mesh();
+        GetComponent<MeshFilter>().mesh = msh;
+
+        //verticies = new Vector3[4];
+        triangles = new int[6 * (roads[0].positions.Count - 1)];
+        verticies = new Vector3[roads[0].positions.Count * 2];
+
+        for (int i = 0; i < roads[0].positions.Count - 1; i++)
+        {
+            //verticies[i] = roads[0].positions[i] + new Vector3(1, 0, 1);
+            verticies[i] = roads[0].positions[i] + Quaternion.AngleAxis(90, Vector3.up) * ((roads[0].positions[i + 1] - roads[0].positions[i]).normalized);
+            verticies[i + 1] = roads[0].positions[i] + Quaternion.AngleAxis(-90, Vector3.up) * ((roads[0].positions[i + 1] - roads[0].positions[i]).normalized);
+            
+            i++;
+            Debug.Log(verticies[i]);
+            Debug.Log(roads[0].positions[i]);
+            Debug.Log(verticies[i + 1]);
+
+            //verticies[i + 1] = roads[0].positions[i] - new Vector3(1, 0, 1);
+        }
+
+            triangles[0] = 0;
+            triangles[1] = 1;
+            triangles[2] = 2;
+            triangles[3] = 2;
+            triangles[4] = 1;
+            triangles[5] = 3;
+            triangles[6] = 2;
+            triangles[7] = 3;
+            triangles[8] = 4;
+            triangles[9] = 4;
+            triangles[10] = 3;
+            triangles[11] = 5;
+            triangles[12] = 4;
+            triangles[13] = 5;
+            triangles[014] = 6;
+            triangles[015] = 6;
+            triangles[016] = 5;
+            triangles[017] = 7;
+        for (int i = 0; i < triangles.Length - 5; i++)
+        {
+            //triangles[i] = i;
+            //triangles[i + 1] = i + 1;
+            //triangles[i + 2] = i + 2;
+            //triangles[i + 3] = i + 2;
+            //triangles[i + 4] = i + 1;
+            //triangles[i + 5] = i + 3;
+
+
+            //i += 6;
+        }
+
+        msh.Clear();
+        msh.vertices = verticies;
+        msh.triangles = triangles;
+
+    }
+
+    private void OnDrawGizmos()
+    {
+        foreach (Vector3 vec in verticies)
+        {
+            Gizmos.DrawSphere(vec, .1f);
+        }
     }
 }
