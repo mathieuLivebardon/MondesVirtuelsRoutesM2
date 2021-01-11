@@ -312,52 +312,34 @@ public class Manager : MonoBehaviour {
         GetComponent<MeshFilter>().mesh = msh;
 
         //verticies = new Vector3[4];
-        triangles = new int[6 * (roads[0].positions.Count - 1)];
-        verticies = new Vector3[roads[0].positions.Count * 2];
 
-        for (int i = 0; i < roads[0].positions.Count - 1; i++)
+        int rpcount = roads[0].positions.Count;
+        verticies = new Vector3[rpcount * 2];
+        triangles = new int[(verticies.Length - 2) * 3];
+
+        for (int i = 0; i < rpcount - 1; i++)
         {
-            //verticies[i] = roads[0].positions[i] + new Vector3(1, 0, 1);
             verticies[i] = roads[0].positions[i] + Quaternion.AngleAxis(90, Vector3.up) * ((roads[0].positions[i + 1] - roads[0].positions[i]).normalized);
             verticies[i + 1] = roads[0].positions[i] + Quaternion.AngleAxis(-90, Vector3.up) * ((roads[0].positions[i + 1] - roads[0].positions[i]).normalized);
             
             i++;
-            Debug.Log(verticies[i]);
-            Debug.Log(roads[0].positions[i]);
-            Debug.Log(verticies[i + 1]);
 
-            //verticies[i + 1] = roads[0].positions[i] - new Vector3(1, 0, 1);
         }
+        //THIS IS UGLYYYYY
+        verticies[verticies.Length - 2] = roads[0].positions[rpcount - 1] + Quaternion.AngleAxis(90, Vector3.up) * ((roads[0].positions[rpcount - 1] - roads[0].positions[rpcount - 2]).normalized);
+        verticies[verticies.Length - 1] = roads[0].positions[rpcount - 1] + Quaternion.AngleAxis(-90, Vector3.up) * ((roads[0].positions[rpcount - 1] - roads[0].positions[rpcount - 2]).normalized);
 
-            triangles[0] = 0;
-            triangles[1] = 1;
-            triangles[2] = 2;
-            triangles[3] = 2;
-            triangles[4] = 1;
-            triangles[5] = 3;
-            triangles[6] = 2;
-            triangles[7] = 3;
-            triangles[8] = 4;
-            triangles[9] = 4;
-            triangles[10] = 3;
-            triangles[11] = 5;
-            triangles[12] = 4;
-            triangles[13] = 5;
-            triangles[014] = 6;
-            triangles[015] = 6;
-            triangles[016] = 5;
-            triangles[017] = 7;
-        for (int i = 0; i < triangles.Length - 5; i++)
+        for (int i = 0, tri = 0; i < triangles.Length; i += 6, tri += 2)
         {
-            //triangles[i] = i;
-            //triangles[i + 1] = i + 1;
-            //triangles[i + 2] = i + 2;
-            //triangles[i + 3] = i + 2;
-            //triangles[i + 4] = i + 1;
-            //triangles[i + 5] = i + 3;
+            triangles[i] = tri;
+            triangles[i + 1] = tri + 1;
+            triangles[i + 2] = tri + 2;
+            triangles[i + 3] = tri + 3;
+            triangles[i + 4] = tri + 2;
+            triangles[i + 5] = tri + 1;
 
-
-            //i += 6;
+            Debug.Log($"{triangles[i]}, {triangles[i+1]}, {triangles[i+2]}," +
+                $"{triangles[i+3]}, {triangles[i+4]}, {triangles[i+5]}");
         }
 
         msh.Clear();
@@ -368,9 +350,9 @@ public class Manager : MonoBehaviour {
 
     private void OnDrawGizmos()
     {
-        foreach (Vector3 vec in verticies)
-        {
-            Gizmos.DrawSphere(vec, .1f);
-        }
+        //foreach (Vector3 vec in verticies)
+        //{
+        //    Gizmos.DrawSphere(vec, .1f);
+        //}
     }
 }
