@@ -69,19 +69,19 @@ public class Manager : MonoBehaviour {
 
     /// <summary> Link roads coordinates with LineRenderer </summary>
     void DrawRoads() {
-        foreach (Road r in roads) {
+        foreach (Road r in roads)
+        {
             GameObject emptyRoadGO = Instantiate(emptyRoad);
             LineRenderer lr = emptyRoadGO.GetComponent<LineRenderer>();
 
-            foreach (Vector3 v in r.positions) {
+            foreach (Vector3 v in r.positions)
+            {
                 lr.positionCount++;
                 lr.SetPosition(lr.positionCount - 1, v);
             }
             lr.name = r.nom;
             lr.widthMultiplier = r.largeur;
 
-            total_vert = 0;
-            total_tri = 0;
         }
         InitMesh();
 
@@ -317,12 +317,15 @@ public class Manager : MonoBehaviour {
     private void InitMesh()
     {
 
+        total_vert = 0;
+        total_tri = 0;
         foreach (Road road in roads)
         {
             total_vert += road.positions.Count * 2;
-            total_tri += (road.positions.Count - 1) * 6; 
+            //total_tri += (road.positions.Count - 1) * 6; 
         }
 
+        total_tri = (total_vert - 2) * 3;
         Debug.Log("total verts " + total_vert);
         Debug.Log("total triangles " + total_tri);
     }
@@ -337,7 +340,7 @@ public class Manager : MonoBehaviour {
         triangles = new int[total_tri];
         //triangles = new int[(verticies.Length - 2) * 3];
 
-        int vert_counter = 0;
+        int vert_inc = 0;
 
         foreach (Road road in roads)
         {
@@ -345,24 +348,26 @@ public class Manager : MonoBehaviour {
 
             for (int i = 0; i < road.positions.Count - 1; i+=2)
             {
-                verticies[vert_counter + i] = road.positions[i] + Quaternion.AngleAxis(90, Vector3.up) * ((road.positions[i + 1] - road.positions[i]).normalized);
-                verticies[vert_counter + i + 1] = road.positions[i] + Quaternion.AngleAxis(-90, Vector3.up) * ((road.positions[i + 1] - road.positions[i]).normalized);
+                verticies[vert_inc + i] = road.positions[i] + Quaternion.AngleAxis(90, Vector3.up) * ((road.positions[i + 1] - road.positions[i]).normalized);
+                verticies[vert_inc + i + 1] = road.positions[i] + Quaternion.AngleAxis(-90, Vector3.up) * ((road.positions[i + 1] - road.positions[i]).normalized);
             
-                //i++;
 
             }
-            verticies[vert_counter + rpcount - 2] = road.positions[rpcount - 1] + Quaternion.AngleAxis(90, Vector3.up) * ((road.positions[rpcount - 1] - road.positions[rpcount - 2]).normalized);
-            verticies[vert_counter + rpcount - 1] = road.positions[rpcount - 1] + Quaternion.AngleAxis(-90, Vector3.up) * ((road.positions[rpcount - 1] - road.positions[rpcount - 2]).normalized);
+            verticies[vert_inc + rpcount - 2] = road.positions[rpcount - 1] + Quaternion.AngleAxis(90, Vector3.up) * ((road.positions[rpcount - 1] - road.positions[rpcount - 2]).normalized);
+            verticies[vert_inc + rpcount - 1] = road.positions[rpcount - 1] + Quaternion.AngleAxis(-90, Vector3.up) * ((road.positions[rpcount - 1] - road.positions[rpcount - 2]).normalized);
 
-            vert_counter += rpcount;
+            vert_inc += rpcount;
 
         }
 
         int tri_counter = 0;
-        //int tri = 0;
+
+        int cp = 0;
+
         foreach (Road road in roads)
         {
-            int triangles_lenght = 6 * (road.positions.Count - 1);
+            //int triangles_lenght = 6 * (road.positions.Count - 1);
+            int triangles_lenght = 6 * (roads[0].positions.Count - 1);
             for (int i = 0, tri = 0; i < triangles_lenght - 5; i += 6, tri += 2)
             {
                 triangles[tri_counter + i] = tri_counter + tri;
@@ -375,6 +380,8 @@ public class Manager : MonoBehaviour {
                 Debug.Log($"{triangles[tri_counter + i]}, {triangles[tri_counter + i + 1]}, {triangles[tri_counter + i + 2]}," +
                     $"{triangles[tri_counter + i + 3]}, {triangles[tri_counter + i + 4]}, {triangles[tri_counter + i + 5]}");
             }
+            Debug.Log(cp++);
+            
             tri_counter += triangles_lenght;
 
         }
