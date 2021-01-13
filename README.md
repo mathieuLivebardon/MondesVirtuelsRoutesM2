@@ -237,3 +237,9 @@ return new Vector2(
 # Resultat
 
 ![](./Ressources/resultat.png)
+
+# Points d'amélioration
+
+- Ajout de mesh pour les routes afin d'éviter l'utilisation de LineRenderer ;
+- Calquer les routes sur les coordonnées du terrain ;
+- Optimiser le temps de calcul à l'aide d'un système asynchrone (Calculer indépendamment chaque route).
