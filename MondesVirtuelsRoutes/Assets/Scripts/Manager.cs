@@ -16,6 +16,8 @@ public class Manager : MonoBehaviour {
 
     [SerializeField]
     private bool fixTerrainCoord;
+    public float distance;
+    Vector3 offset;
 
     void Start() {
         roads = new List<Road>();
@@ -30,21 +32,19 @@ public class Manager : MonoBehaviour {
 
     private void FixTerrainCoord() {
 
-        Mesh mesh = terrain.GetComponentInChildren<MeshFilter>().mesh;
-        Vector3[] newVertices = new Vector3[mesh.vertices.Length];
-        for (int i = 0; i < mesh.vertices.Length; i++) {
-            Vector3 p = mesh.vertices[i];
-            Vector3 reversed = new Vector3(p.x, p.z, -p.y);
+        Mesh mesh = terrain.GetComponent<MeshFilter>().mesh;
 
-            newVertices[i] = reversed;
-        }
-
-        terrain.GetComponentInChildren<MeshFilter>().mesh.vertices = newVertices;
-        terrain.GetComponentInChildren<MeshFilter>().mesh.RecalculateNormals();
+        offset = mesh.bounds.center;
+        Debug.Log(offset);
+        GameObject parent = new GameObject("mapCenter");
+        parent.transform.position = mesh.bounds.center;
+        terrain.transform.parent = parent.transform;
+        parent.transform.position = Vector3.zero;
+        parent.transform.Rotate(Vector3.right, -90);
 
         MeshCollider mc = terrain.GetComponentInChildren<MeshCollider>();
         if (mc == null)
-            mc = terrain.transform.GetChild(0).gameObject.AddComponent<MeshCollider>();
+            mc = terrain.transform.gameObject.AddComponent<MeshCollider>();
         else {
             mc.sharedMesh = null;
             mc.sharedMesh = mesh;
@@ -107,7 +107,7 @@ public class Manager : MonoBehaviour {
 
                 Vector3 temporaryPoint = Vector3.negativeInfinity;
 
-                while (temporaryPoint != currentVertice && counterA < 50) {
+                while (temporaryPoint != currentVertice && counterA < 100) {
 
                     int counterB = 0;
 
@@ -117,8 +117,17 @@ public class Manager : MonoBehaviour {
 
                     int temporaryIndexTriangle = currentIndexTriangle;
 
-                    while ((amountSharedVertices < 2 && previousIndexTriangle != temporaryIndexTriangle) && counterB < 50) {
-                        Vector3 verticeInTheMiddle = previousVertice + (temporaryPoint - previousVertice) * 0.5f;
+                    float multiplier = 0.5f;
+
+                    while ((amountSharedVertices < 2) && counterB < 100) {
+                        
+                        Vector3 verticeInTheMiddle = previousVertice + (temporaryPoint - previousVertice) * multiplier;
+                        
+                        if (Vector3.Distance(verticeInTheMiddle, previousVertice) < distance)
+                        {
+                            break;
+                        }
+
                         verticeInTheMiddle.y = GetAltitudeFromMap(new Vector3(verticeInTheMiddle.x, 9999, verticeInTheMiddle.z), out temporaryIndexTriangle);
 
                         amountSharedVertices = ManageTriangleIntersection(previousIndexTriangle, temporaryIndexTriangle, out sharedVertices);
@@ -127,7 +136,7 @@ public class Manager : MonoBehaviour {
 
                         counterB++;
 
-                        if (counterB >= 50) {
+                        if (counterB >= 10) {
                             print("counterB : " + counterB);
 
                             print("currentVertice : " + currentVertice);
@@ -146,7 +155,14 @@ public class Manager : MonoBehaviour {
                     // on the shared edge
                     if (amountSharedVertices == 2) {
                         if (GetPointOnEdge(previousVertice, currentVertice, sharedVertices[0], sharedVertices[1], out Vector3 pointOnEdge)) {
-                            positions.Add(pointOnEdge);
+                            if ((pointOnEdge.y- previousVertice.y) > distance)
+                            {
+                                positions.Add(pointOnEdge);
+                            }
+                            else if ((pointOnEdge.y - currentVertice.y) > distance)
+                            {
+                                positions.Add(pointOnEdge);
+                            }
                         }
                     }
 
@@ -157,7 +173,7 @@ public class Manager : MonoBehaviour {
 
                     positions.Add(temporaryPoint);
 
-                    if (counterA >= 50) {
+                    if (counterA >= 10) {
                         print("counterA : " + counterA);
                     }
                 }
@@ -167,6 +183,9 @@ public class Manager : MonoBehaviour {
         }
     }
 
+
+
+
     private bool GetPointOnEdge(Vector3 roadA, Vector3 roadB, Vector3 edgeA, Vector3 edgeB, out Vector3 pointOnEdge) {
 
         pointOnEdge = Vector3.negativeInfinity;
@@ -175,19 +194,28 @@ public class Manager : MonoBehaviour {
             return false;
         }
 
+        edgeA = new Vector3(edgeA.x - offset.x,  edgeA.z - offset.z, -edgeA.y + offset.y);
+        edgeB = new Vector3(edgeB.x - offset.x,  edgeB.z - offset.z, -edgeB.y + offset.y);
+
+
         Vector2 firstPoint_road2D = new Vector2(roadA.x, roadA.z);
         Vector2 secondPoint_road2D = new Vector2(roadB.x, roadB.z);
 
         Vector2 firstPoint_Edge2D = new Vector2(edgeA.x, edgeA.z);
         Vector2 secondPoint_Edge2D = new Vector2(edgeB.x, edgeB.z);
 
+        Debug.Log("firstPoint_Edge2D : "+firstPoint_Edge2D);
+        Debug.Log("secondPoint_Edge2D : "+secondPoint_Edge2D);
+
         Vector2 intersection = GetIntersectionPointCoordinates(firstPoint_road2D, secondPoint_road2D, firstPoint_Edge2D, secondPoint_Edge2D, out bool found);
+        Debug.Log("intersection : " + intersection);
         if (found) {
             float t = (intersection.x - firstPoint_Edge2D.x) / (secondPoint_Edge2D.x - firstPoint_Edge2D.x);
             pointOnEdge = (edgeA + (edgeB - edgeA) * t);
-
+            Debug.Log("pointOnEdge : " + pointOnEdge);
             return true;
         }
+
         return false;
     }
 
