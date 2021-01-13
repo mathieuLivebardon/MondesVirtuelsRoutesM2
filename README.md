@@ -1,33 +1,34 @@
-# Construire de routes à partir de données numériques
+# Construction de routes à partir de données numériques
 
-Apllication Unity3D 2019.4.10f1 par *Valentin LAMPRIERE* (***valentinLampriere***) et *Mathieu LIVEBARDON* (***Tsuno96***)
+Application Unity3D 2019.4.10f1 par *Valentin LAMPRIERE* (***valentinLampriere***) et *Mathieu LIVEBARDON* (***Tsuno96***)
 
 # Contexte
 
-Travail réalisé lors du cours de Mondes Virtuels en Master 2 Informatique
+Travail réalisé dans le cadre du cours de Mondes Virtuels en Master 2 Informatique encadré par Gilles Gesquière.
 
 # Sources
 
-## Tuto Youtube :
+**Json Parsing in Unity By using Newton json Plugin(JSON .Net) and Jsonutility** par *Nested Mango*
 - https://www.youtube.com/watch?v=osWRH8M1H5s
 
-## Liens :
+**Intersection point between two lines in 2D** sur le blog de *Dakwamine*
 - https://blog.dakwamine.fr/?p=1943
 
 
 # GeoJSON
 
-Les données exploitées sont sous la forme de GeoJSON.
-Le GeoJSON est un format de données basé sur le JSON pour representer des caractéristiques géographiques simples.
+Les données fournies sont sous la forme de GeoJSON.
+Le GeoJSON est un format de données basé sur le JSON, celui-ci permet de représenter des caractéristiques géographiques simples.
 
 Pour les routes il est notamment écrit les coordonnées des points de la route, sa largeur, son nom, son sens...
 
 ## JSON -> CS
 
-Les .json peuvent être convertit pour leur utilisation en c# (https://json2csharp.com/)
+Les fichiers json doivent être convertis pour pouvoir les utiliser en c# (https://json2csharp.com/)
 
 ### Exemple :
-uneRoute.geojson.json
+Dans cet exemple nous pouvois voir un fichier geojson comportant une route stockée en JSON, puis les classes C# associées.
+
 ```json
 {
 "type": "FeatureCollection",
@@ -105,7 +106,9 @@ uneRoute.geojson.json
 
 ![](./Ressources/JSONdoNET.jpg)
 
-**JSONdotNET For Unity** est un package pour utiliser le framework (**JSONdotNET**). Ce framework ajoute un outil de déserialisation de JSON.
+**JSONdotNET For Unity** est un package qui ajoute un outil de déserialisation de JSON.
+
+Il s'utilise en C# de la manière suivante :
 ```cs
 JsonConvert.DeserializeObject<Root>(strFile);
 ```
@@ -117,7 +120,7 @@ JsonConvert.DeserializeObject<Root>(strFile);
 
 ***Road.cs***
 
-Les routes sont représentées par des LineRenderer. Le LineRenderer est un objet *Unity3D* utile pour représenter des lignes avec une liste de coordonnées, il offre également la possibilité de définir la l'épaisseur de la ligne.
+Les routes sont représentées par des LineRenderer. Le LineRenderer est un objet *Unity3D* utile pour représenter des lignes à partir d'une liste de coordonnées, il offre également la possibilité de définir la largeur de la ligne.
 
 ```cs
 public float largeur { get; }
@@ -126,7 +129,7 @@ public List<Vector3> positions { get; }
 
 ## Le terrain
 
-Le terrain est un objet *3D* possedant un Mesh et un MeshCollider pour réagir aux tests de collision. Par soucis de simplicité, le terrain à été créer à la main sur *Blender* (*NB : c'est un terrain "test" pour l'exercice*).
+Le terrain est un objet *3D* (un mesh) comportant un composant **MeshCollider**. Ce dernier est nécéssaire pour les test de collision. Par soucis de simplicité, un terrain à été créer à l'aide de *Blender* (*NB : il s'agit d'un terrain "test" pour l'exercice*).
 
 # Application des routes sur le terrain
 
@@ -134,23 +137,31 @@ Le terrain est un objet *3D* possedant un Mesh et un MeshCollider pour réagir a
 
 ## Régler la position du terrain
 
-- Inversion des axes y et z (*NB : Blender et Unity n'utilise pas le même repaire*).
-```cs
-Vector3[] newVertices = new Vector3[mesh.vertices.Length];
-for (int i = 0; i < mesh.vertices.Length; i++) {
-    Vector3 p = mesh.vertices[i];
-    Vector3 reversed = new Vector3(p.x, p.z, -p.y);
+- Effectuer une rotation ainsi qu'une translation sur le terrain. Ces transformations sont appliquées pour pallier le fait que le pivot de l'objet terrain n'est pas au centre du maillage et que l'axe Z et l'axe Y sont inversé sur Unity3D.
 
-    newVertices[i] = reversed;
-}
+```cs
+Mesh mesh = terrain.GetComponent<MeshFilter>().mesh;
+offset = mesh.bounds.center;
+// Create a new Empty Gameobject
+GameObject parent = new GameObject("mapCenter");
+// Set it position to the center of the terrain mesh
+parent.transform.position = mesh.bounds.center;
+// Set it as a parent in the hierarchy
+terrain.transform.parent = parent.transform;
+// Reset it position to zero (this way it also reset the terrain position)
+parent.transform.position = Vector3.zero;
+// Rotate the object in the X axis
+parent.transform.Rotate(Vector3.right, -90);
+
 ```
 
 ## Création de la liste de route
 
-Pour chaque position de chaque route on applique un offset sur l'axe **x** et sur l'axe **z** (L'axe **y** est la hauteur) pour recentrer les routes aux alentours de (0,0,0).   
+Pour chaque position de chaque route on définit la position en fonction des données extraitent du JSON auxquelles on applique un décallage sur l'axe **x** et sur l'axe **z** (L'axe **y** est la hauteur) dans le but de recentrer les routes dans la scène.   
 
 ```cs
-for (int i = 0; i< f.geometry.coordinates[0].Count;i++) {
+// Loop through every positions in roads
+for (int i = 0; i < f.geometry.coordinates[0].Count; i++) {
     List<double> l = f.geometry.coordinates[0][i];
     float x = (float)l[0] - xOffset;
     float z = (float)l[1] - zOffset;
@@ -158,32 +169,39 @@ for (int i = 0; i< f.geometry.coordinates[0].Count;i++) {
 
 ### Calcul de la hauteur (l'axe **y**)
 
-La donnée d'altitude définit dans les GeoJSON sont parfois érronée, elle doit donc être recalculé grâce aux données du terrain qui elles sont plus précisent à ce niveau.
+Les données d'altitude définies dans les GeoJSON sont parfois érronées, elles doivent donc être recalculées grâce aux données du terrain.
 
-Des rayons sont lancés à chaque position de chaque route pour trouver leur altitude.
+Pour parvenir à ce problème, des rayons sont lancés depuis chaque position de chaque route. Lorsque le rayon rencontre le terrain, la coordonnée Y à l'impact est récupérée. Celle-ci devient la coordonnée Y sur la route.
 
 ![](./Ressources/Route.jpg)
 
-Un probleme évident se dégage de ceci, les routes traversent/survolent le terrain entre les points
+Un probleme se dégage : les routes traversent ou survolent le terrain entre les points que composent la route.
 
 ![](./Ressources/Tunnel.jpg)
 
-Pour régler ce problème des points intermédiaires doivent être ajoutés sur les routes
+Pour régler ce problème des points intermédiaires doivent être ajoutés sur les routes.
 
-- Des points sur chaque triangles du mesh passant en dessus ou en dessous de la route
+L'ajout de points se fait en deux étapes qui sont :
 
-Lors de la création des points si ils ne sont pas sur des triangles consécutifs (partageant une arrête), on recherche un point entre les deux qui vérifie cette condition (recherche dichotomique).
+Lors de l'ajout des points sur la route, chaque points consécutifs doivent se trouver sur des triangles partageant une même arrête. Dans le cas ou la condition n'est pas validée, un point intermédiaire vérifiant la condition est calculé.
+- Pour chaque triangles survolé ou traversé par la route, un point est ajouté.
+- Pour chaque arrêtes du terrain entre deux points de la route, un point est ajouté sur cette dernière.
 
+
+Calcul d'un point au centre du segment de route défnie par `previousVertice` et `temporaryPoint` :
 ```cs
 Vector3 verticeInTheMiddle = previousVertice + (temporaryPoint - previousVertice) * 0.5f;
 ```
 
 ![](./Ressources/PointsTriangleIntermediaire.jpg)
 
-
 - Des points sur chaque arrête des triangles
 
-Maintenant qu'il y a pour sûre au moins un point sur chaque triangle est possible de trouver les arretes des triangles consécutifs, il suffit d'ajouter les points d'intersections entre la route et ces arretes.
+
+A cette étape, la route est composé d'au moins un point par triangle du terrain sur lequel elle repose. Or comme indiqué ci-dessus certaines portions de routes traversent toujours le terrain. Il suffit d'ajouter un point sur la route à la coordonnée définie par l'intersection entre l'arrête et la route.
+
+
+Méthode permettant de trouver l'intersection entre les segment A1 A2 et B1 B2 :
 ```cs
 /// <summary>
 /// Gets the coordinates of the intersection point of two lines.
